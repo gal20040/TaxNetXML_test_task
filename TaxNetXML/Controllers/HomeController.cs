@@ -4,36 +4,29 @@ using System.Data;
 using System.Data.Entity;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Mvc;
 using System.Xml;
 using TaxNetXML.Models;
 
-//TODO: если Entity Framework нельзя использовать, тогда переделать метод Index - не использовать Entity Framework
-//TODO: если Entity Framework нельзя использовать, тогда константы со строками вынести в отдельный настроечный файл
-//TODO: разобраться с методом Dispose
-//TODO: если Entity Framework можно использовать, тогда попробовать реализовать insert и update через фреймворк - см. метод ReadFromXml
-
+//TODO если Entity Framework нельзя использовать, тогда переделать метод Index - не использовать Entity Framework
+//TODO если Entity Framework нельзя использовать, тогда константы со строками вынести в отдельный настроечный файл
+//TODO разобраться с методом Dispose
+//TODO если Entity Framework можно использовать, тогда попробовать реализовать insert и update через фреймворк - см. метод ReadFromXml
 
 namespace TaxNetXML.Controllers {
     public class HomeController : Controller {
         UserContext db = new UserContext();
-        private const string pathToXML = "D:\\gal20040\\CSharp\\TaxNetXML\\TaxNetXML\\App_Data\\usersdb.xml";
+        private string pathToXML = "D:\\gal20040\\CSharp\\TaxNetXML\\TaxNetXML\\App_Data\\usersdb.xml";
+        //private static string pathToXML = Server.MapPath("~/App_Data/usersdb.xml");//"~\\App_Data\\usersdb.xml";
         private const string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename='|DataDirectory|\Userstore.mdf';Integrated Security=True";
         private const string sql = "SELECT * FROM Users";
-
-        //public ViewResult Index() {
-        //    // получаем из бд все объекты User
-        //    IEnumerable<User> users = db.Users;
-        //    // передаем все объекты в динамическое свойство Users в ViewBag
-        //    ViewBag.Users = users;
-        //    // возвращаем представление
-        //    return View();
-        //}
 
         //
         // Summary:
         //     Получает из БД список пользователей и отправляет его в представление.
         public async Task<ActionResult> Index() {
+            string pathToXML = Server.MapPath("~/App_Data/usersdb.xml");
             IEnumerable<User> users = await db.Users.ToListAsync();
             ViewBag.Users = users;
             return View("Index");
@@ -95,44 +88,22 @@ namespace TaxNetXML.Controllers {
                 adapter.InsertCommand = sqlCommand;
                 adapter.InsertCommand.ExecuteNonQuery();
 
-                //adapter.Fill(ds);
-
-                //DataTable dt = ds.Tables[0];
-                //// добавим новую строку
-                //DataRow newRow = dt.NewRow();
-                //newRow["Name"] = "Alice2";
-                //newRow["Age"] = 240;
-                //dt.Rows.Add(newRow);
-
-                //создаем объект SqlCommandBuilder
-                //SqlCommandBuilder commandBuilder = new SqlCommandBuilder(adapter);
-                //adapter.DeleteCommand = commandBuilder.GetDeleteCommand(true);
-                //adapter.UpdateCommand = commandBuilder.GetUpdateCommand(true);
-                //adapter.InsertCommand = commandBuilder.GetInsertCommand(true);
-
-                /*
-DeleteCommand=DELETE FROM [Users]
-              WHERE (([Id] = @Original_Id) AND ([Name] = @Original_Name) AND ([Age] = @Original_Age))
-UpdateCommand=UPDATE [Users] SET [Name] = @Name, [Age] = @Age
-              WHERE (([Id] = @Original_Id) AND ([Name] = @Original_Name) AND ([Age] = @Original_Age))
-InsertCommand=INSERT INTO [Users] ([Name], [Age])
-              VALUES (@Name, @Age)*/
-
-                //ds.Clear();
-                //ds.ReadXml(pathToXML);
-                //s = ds.GetXml();
-                //adapter.Update(ds);
-                ////adapter.Update(dt); //альтернативный способ -обновление только одной таблицы
-
-                //заново получаем данные из бд
-                //очищаем полностью DataSet
-                //ds.Clear();
-                //// перезагружаем данные
-                //adapter.Fill(ds);
-
                 connection.Close();
+                //TODO удалить обработанный файл
             }
             return "Данные загружены в базу данных. " + queriesString;
+        }
+
+        [HttpPost]
+        public string Upload(HttpPostedFileBase upload) {
+            if (upload != null) {
+                // получаем имя файла
+                string fileName = System.IO.Path.GetFileName(upload.FileName);
+                // сохраняем файл в папку Files в проекте
+                pathToXML = Server.MapPath("~/UploadedFiles/" + fileName);
+                upload.SaveAs(pathToXML);
+            }
+            return ReadFromXml();
         }
     }
 }
