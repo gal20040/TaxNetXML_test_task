@@ -1,0 +1,18 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Загрузка данных из XML файла в БД";
+}
+
+@*@{
+    ViewBag.Title = "Загрузка данных из XML файла в БД";
+}*@
+<h2>@ViewBag.Title.</h2>
+
+<div>
+    <h3>Выберите файл для загрузки</h3>
+    @using (Html.BeginForm("Upload", "LoadXMLtoDB", FormMethod.Post, new { enctype = "multipart/form-data" })) {
+        <p>Ограничение на размер файла: 5 МБ</p> //TODO сделать проверку размера файла
+        <input type="file" name="upload" /><br>
+        <input type="submit" value="Загрузить" />
+    }
+</div>
