@@ -2,26 +2,35 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div>
-    <h3>Выберите файл для загрузки</h3>
-    @using (Html.BeginForm("Upload", "Home", FormMethod.Post, new { enctype = "multipart/form-data" })) {
-        <p>Ограничение на размер файла: 5 МБ</p> //TODO сделать проверку размера файла
-        <input type="file" name="upload" /><br>
-        <input type="submit" value="Загрузить" />
-    }
 
-    <h3>Users</h3>
+@*@{
+        ViewBag.Title = "Выгрузка базы данных в XML файл";
+    }
+    <h2>@ViewBag.Title.</h2>*@
+
+<div>
+    @*<table>
+            <tr class="header">
+                <td><p>@ViewBag.ColumnHeaders[0]</p></td>
+                <td><p>@ViewBag.ColumnHeaders[1]</p></td>
+                <td><p>@ViewBag.ColumnHeaders[2]</p></td>
+            </tr>
+        </table>*@
+
+    <h3>Files</h3>
     <table>
         <tr class="header">
-            <td><p>id</p></td>
-            <td><p>name</p></td>
-            <td><p>age</p></td>
+            <td><p>Id</p></td>
+            <td><p>FileName</p></td>
+            <td><p>FileVersion</p></td>
+            <td><p>ChangeDate</p></td>
         </tr>
-        @foreach (var b in ViewBag.Users) {
+        @foreach (var b in ViewBag.Files) {
             <tr>
                 <td><p>@b.Id</p></td>
-                <td><p>@b.Name</p></td>
-                <td><p>@b.Age</p></td>
+                <td><p>@b.FileName</p></td>
+                <td><p>@b.FileVersion</p></td>
+                <td><p>@b.ChangeDate</p></td>
             </tr>}
     </table>
 </div>
