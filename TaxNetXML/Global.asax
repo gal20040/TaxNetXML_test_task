@@ -1,1 +1,1 @@
-﻿<%@ Application Codebehind="Global.asax.cs" Inherits="TaxNetXML.MvcApplication" Language="C#" %>
+﻿<%@ Application CodeFile="Global.asax.cs" Inherits="TaxNetXML.MvcApplication" Language="C#" %>
