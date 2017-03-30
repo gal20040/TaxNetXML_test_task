@@ -21,16 +21,16 @@
     <table>
         <tr class="header">
             <td><p>Id</p></td>
-            <td><p>FileName</p></td>
+            <td><p>Name</p></td>
             <td><p>FileVersion</p></td>
-            <td><p>ChangeDate</p></td>
+            <td><p>DateTime</p></td>
         </tr>
         @foreach (var b in ViewBag.Files) {
             <tr>
                 <td><p>@b.Id</p></td>
-                <td><p>@b.FileName</p></td>
+                <td><p>@b.Name</p></td>
                 <td><p>@b.FileVersion</p></td>
-                <td><p>@b.ChangeDate</p></td>
+                <td><p>@b.DateTime</p></td>
             </tr>}
     </table>
 </div>
