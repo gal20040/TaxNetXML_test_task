@@ -1,109 +1,128 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Mvc;
-using System.Xml;
 using TaxNetXML.Models;
 
-//TODO если Entity Framework нельзя использовать, тогда переделать метод Index - не использовать Entity Framework
-//TODO если Entity Framework нельзя использовать, тогда константы со строками вынести в отдельный настроечный файл
+//todo сделать автосоздание бд. если её нет
+//TODO переделать подпись в _Layout.cshtml
 //TODO разобраться с методом Dispose
 //TODO если Entity Framework можно использовать, тогда попробовать реализовать insert и update через фреймворк - см. метод ReadFromXml
 
 namespace TaxNetXML.Controllers {
     public class HomeController : Controller {
-        UserContext db = new UserContext();
-        private string pathToXML = "D:\\gal20040\\CSharp\\TaxNetXML\\TaxNetXML\\App_Data\\usersdb.xml";
-        //private static string pathToXML = Server.MapPath("~/App_Data/usersdb.xml");//"~\\App_Data\\usersdb.xml";
-        private const string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename='|DataDirectory|\Userstore.mdf';Integrated Security=True";
-        private const string sql = "SELECT * FROM Users";
+        private FileContext db = new FileContext();
+
+        //TODO переделать на относительный путь
+        //private string pathToXML; // = "D:\\gal20040\\CSharp\\TaxNetXML\\TaxNetXML\\App_Data\\filesdb.xml";
+        //private static string pathToXML = Server.MapPath("~/App_Data/filesdb.xml");//"~\\App_Data\\filesdb.xml";
+
+        //private const string CONNECTION_STRING = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename='|DataDirectory|\FileStore.mdf';Integrated Security=True";
+        //private const string sql = "SELECT * FROM Files";
 
         //
         // Summary:
-        //     Получает из БД список пользователей и отправляет его в представление.
+        //     Получает из БД список данных и отправляет его в представление пользователю.
         public async Task<ActionResult> Index() {
-            string pathToXML = Server.MapPath("~/App_Data/usersdb.xml");
-            IEnumerable<User> users = await db.Users.ToListAsync();
-            ViewBag.Users = users;
+            //string pathToXML = Server.MapPath("~/App_Data/filesdb.xml");
+            IEnumerable<File> files = await db.Files.ToListAsync();
+            ViewBag.Files = files;
+
+            //todo сделать передачу заголовков таблицы
+            //string[] columnHeaders = new string[] { "A", "B", "C" };
+            //ViewBag.ColumnHeaders = columnHeaders;
+
             return View("Index");
         }
 
-        //
-        // Summary:
-        //     Получает из БД список пользователей и записывает его в xml файл (см. переменную pathToXML).
-        //
-        // Returns:
-        //     Возвращает сообщение об успешном сохранении данных в файл.
-        public string WriteToXml() {
-            using (SqlConnection connection = new SqlConnection(connectionString)) {
-                connection.Open();
-                SqlDataAdapter adapter = new SqlDataAdapter(sql, connection);
+        ////
+        //// Summary:
+        ////     Определяет полный путь и имя выходного файла.
+        ////     Далее запускает методы: WriteToXml и GiveFileToUser.
+        ////
+        //// Returns:
+        ////     Ретранслирует выгруженный файл пользователю.
+        //public FileResult BackupDBToXML() { //FileResult
+        //    //string returnMessage = "";
+        //    string pathToOutputXML = "";
+        //    //try {
+        //    pathToOutputXML = string.Concat(Server.MapPath("~/Files/Output/db_backup"),
+        //                                        //DateTime.Now.ToString(ConstantData.dateFormaForFileName), //todo скорее всего придётся отказаться. пока не знаю, как удалять такие файлы
+        //                                        ".xml");
+        //        //returnMessage = returnMessage + 
+        //        WriteToXml(pathToOutputXML);
+        //        //return returnMessage;
 
-                DataSet dataSet = new DataSet("Users");
-                DataTable dataTable = new DataTable("User");
-                dataSet.Tables.Add(dataTable);
-                adapter.Fill(dataSet.Tables["User"]);
 
-                dataSet.WriteXml(pathToXML);
-                connection.Close();
-                return "Данные сохранены в файл";
-            }
-        }
+        //        return GiveFileToUser(pathToOutputXML);
+        //    //} catch (Exception e) {
+        //    //    returnMessage = returnMessage + pathToOutputXML + e.ToString();
+        //    //    return returnMessage;
+        //    //}
+        //}
 
-        //
-        // Summary:
-        //     Считывает из xml файла (см. переменную pathToXML) данные по пользователям
-        //     и в цикле перебирает их и составляет один общий SQL запрос на добавление новых пользователей.
-        //
-        // Returns:
-        //     Возвращает сообщение об успешной загрузке данных в базу данных.
-        public string ReadFromXml() {
-            const string insertQueryTemplate = "INSERT INTO {0:d} (Name, Age) VALUES ('{1:d}', {2:d})";
+        ////
+        //// Summary:
+        ////     Получает из БД данные и записывает их в xml файл.
+        ////
+        //// Parameters:
+        ////   pathToOutputXML:
+        ////     Полный путь до файла в системе + его имя и расширение.
+        //private void WriteToXml(string pathToOutputXML) { //void
+        //    //string returnMessage = "";
+        //    SqlConnection connection = new SqlConnection(ConstantData.CONNECTION_STRING);
 
-            string queriesString = ""; //строка для нескольких SQL запросов
-            string name = null;
-            int age = 0;
+        //    //try {
+        //        using (connection) {
+        //            connection.Open();
+        //            SqlDataAdapter adapter = new SqlDataAdapter(ConstantData.querySelectFromFiles, connection);
 
-            using (SqlConnection connection = new SqlConnection(connectionString)) {
-                DataSet ds = new DataSet();
-                SqlDataAdapter adapter = new SqlDataAdapter(sql, connection);
-                SqlCommand sqlCommand;
+        //            DataSet dataSet = new DataSet("Files");
+        //            DataTable dataTable = new DataTable("File");
+        //            dataSet.Tables.Add(dataTable);
+        //            adapter.Fill(dataSet.Tables["File"]);
 
-                XmlReader xmlFile = XmlReader.Create(pathToXML, new XmlReaderSettings());
-                ds.ReadXml(xmlFile);
+        //            dataSet.WriteXml(pathToOutputXML);
+        //        }
+        //    //} catch (Exception e) {
+        //    //    returnMessage = pathToOutputXML + e.ToString();
+        //    //} finally {
+        //    connection.Close();
+        //    //}
+        //    //return returnMessage;
+        //}
 
-                connection.Open();
-                for (int i = 0; i < ds.Tables[0].Rows.Count; i++) {
-                    name =                ds.Tables[0].Rows[i].ItemArray[0].ToString();
-                    age = Convert.ToInt32(ds.Tables[0].Rows[i].ItemArray[1]);
-                    queriesString = string.Concat(string.Format(insertQueryTemplate, "Users", name, age),
-                                                  " ", queriesString);
-                }
+        ////
+        //// Summary:
+        ////     Выгружает файл пользователю.
+        ////
+        //// Parameters:
+        ////   pathToOutputXML:
+        ////     Полный путь до файла в системе + его имя и расширение.
+        ////
+        //// Returns:
+        ////     Выгружает файл пользователю.
+        //private FileResult GiveFileToUser(string pathToOutputXML) { //FileResult
+        //    //string returnMessage = "";
+        //    SqlConnection connection = new SqlConnection(ConstantData.CONNECTION_STRING);
 
-                sqlCommand = new SqlCommand(queriesString, connection);
-                adapter.InsertCommand = sqlCommand;
-                adapter.InsertCommand.ExecuteNonQuery();
+        //    //try {
+        //        using (connection) {
+        //            string file_name = System.IO.Path.GetFileName(pathToOutputXML);
 
-                connection.Close();
-                //TODO удалить обработанный файл
-            }
-            return "Данные загружены в базу данных. " + queriesString;
-        }
-
-        [HttpPost]
-        public string Upload(HttpPostedFileBase upload) {
-            if (upload != null) {
-                // получаем имя файла
-                string fileName = System.IO.Path.GetFileName(upload.FileName);
-                // сохраняем файл в папку Files в проекте
-                pathToXML = Server.MapPath("~/UploadedFiles/" + fileName);
-                upload.SaveAs(pathToXML);
-            }
-            return ReadFromXml();
-        }
+        //            connection.Close();
+        //            return File(pathToOutputXML, ConstantData.file_type, file_name);
+        //        }
+        //    //} catch (Exception e) {
+        //    //    //string returnMessage = e.ToString();
+        //    //    connection.Close();
+        //    //    return e.ToString();
+        //    //}
+        //    //finally {
+        //    //    connection.Close();
+        //    //}
+        //}
     }
 }
