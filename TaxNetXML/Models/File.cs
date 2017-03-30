@@ -3,9 +3,9 @@
 namespace TaxNetXML.Models {
 //CREATE TABLE [dbo].[Files] (
 //    [Id] INT IDENTITY(1, 1) NOT NULL PRIMARY KEY,
-//    [FileName] NVARCHAR(100) NOT NULL,
+//    [Name] NVARCHAR(100) NOT NULL,
 //    [FileVersion] NVARCHAR(50) NOT NULL,
-//    [ChangeDate] DATETIME2(7) NOT NULL
+//    [DateTime] DATETIME2(7) NOT NULL
 //);
 
     //
@@ -15,16 +15,16 @@ namespace TaxNetXML.Models {
     // Fields:
     //   Id:
     //     Номер записи
-    //   FileName:
+    //   Name:
     //     Наименование файла
     //   FileVersion:
     //     Версия файла
-    //   ChangeDate:
+    //   DateTime:
     //     Дата изменения файла
     public class File {
         public int Id { get; set; }
-        public string FileName { get; set; }
+        public string Name { get; set; }
         public string FileVersion { get; set; }
-        public DateTime ChangeDate { get; set; }
+        public DateTime DateTime { get; set; }
     }
 }
