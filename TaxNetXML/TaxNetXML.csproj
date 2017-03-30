@@ -156,6 +156,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\BackupDBController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\LoadXMLtoDBController.cs" />
     <Compile Include="Global.asax.cs">
@@ -182,6 +183,7 @@
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Properties\PublishProfiles\test1.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
@@ -208,9 +210,13 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\BackupDBToFile.cshtml" />
-    <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\LoadXMLtoDB\Index.cshtml" />
+    <Content Include="Views\BackupDB\Create.cshtml" />
+    <Content Include="Views\BackupDB\Delete.cshtml" />
+    <Content Include="Views\BackupDB\Details.cshtml" />
+    <Content Include="Views\BackupDB\Edit.cshtml" />
+    <Content Include="Views\BackupDB\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Files\Input\" />
