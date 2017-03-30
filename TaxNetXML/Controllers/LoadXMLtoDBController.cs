@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
 using System.IO;
@@ -61,66 +60,94 @@ namespace TaxNetXML.Controllers {
         // Returns:
         //     Возвращает сообщение об успешной загрузке данных в БД.
         private string ReadFromXml(string pathToInputXML) {
-            string queriesString = ""; //строка для нескольких SQL запросов
+            string queriesString = ""; //общий SQL запрос для нескольких строк
             string returnMessage = "";
             Models.File file = new Models.File();
-            //Данные загружены в базу данных. INSERT INTO Files (FileName, FileVersion, ChangeDate) VALUES ('testNameFile', '', '30.03.2017') s1=30 марта 2017 г. s2=13:00:00 s3
+            //Данные загружены в базу данных. INSERT INTO Files (Name, FileVersion, DateTime) VALUES ('testNameFile', '', '30.03.2017') s1=30 марта 2017 г. s2=13:00:00 s3
             //2017-03-30T13:00:00.00+03:00
             XmlReader xmlFile = XmlReader.Create(pathToInputXML, new XmlReaderSettings());
-            SqlConnection connection = new SqlConnection(ConstantData.connectionString);
+            SqlConnection connection = new SqlConnection(ConstantData.CONNECTION_STRING);
 
             try {
                 using (connection) {
                     //const string insertQueryTemplate = "INSERT INTO {0:d} (Name, Age) VALUES ('{1:d}', '{2:d}', '{3:d}')";
                     //string pathToInputXML = Server.MapPath("~/Files/Input/Input.xml"); //todo переделать на уникальное имя файла
 
-                    DataSet ds = new DataSet();
+                    //DataSet ds = new DataSet();
                     SqlDataAdapter adapter = new SqlDataAdapter(ConstantData.querySelectFromFiles, connection);
                     SqlCommand sqlCommand;
 
-                    ds.ReadXml(xmlFile);
+                    //ds.ReadXml(xmlFile);
 
                     connection.Open();
                     CultureInfo provider = CultureInfo.InvariantCulture;
                     object dateObject;
 
-                    for (int i = 0; i < ds.Tables[0].Rows.Count; i++) {
-                        file.FileName = Convert.ToString(ds.Tables[0].Rows[i].ItemArray[0]);
+                    XmlDocument doc = new XmlDocument();
+                    doc.Load(pathToInputXML);
 
-                        dateObject = ds.Tables[0].Rows[i].ItemArray[1];
+                    file.FileVersion = doc.SelectSingleNode("File/@FileVersion").InnerText;
+
+                    foreach (XmlNode node in doc.SelectNodes("//File")) {
+                        file.Name = node.SelectSingleNode("Name").InnerText;
+
+                        //если в тэге DateTime пусто, то берём текущие дату и время.
+                        dateObject = node.SelectSingleNode("DateTime").InnerText;
                         if (dateObject == null)
-                            file.ChangeDate = DateTime.Now;
+                            file.DateTime = DateTime.Now;
                         else
-                            file.ChangeDate = DateTime.ParseExact(
+                            file.DateTime = DateTime.ParseExact(
                                                               Convert.ToString(dateObject),
-                                                              ConstantData.dateFormat, provider
+                                                              ConstantData.dateFormatWithDash, provider
                                                              );
 
-                        file.FileVersion = ""; //TODO вытащить версию из атрибута
-
+                        //добавляем всю инфу по текущему node в шаблон запроса
+                        //и добавляем готовый запрос в общий список
+                        //todo сейчас для каждой строки свой запрос - сделать общий запрос.
                         queriesString = string.Concat(string.Format(ConstantData.insertQueryTemplate,
-                                                                    "Files", file.FileName, file.FileVersion,
-                                                                    file.ChangeDate.ToString(ConstantData.dateFormat)
+                                                                    "Files", file.Name, file.FileVersion,
+                                                                    file.DateTime.ToString(ConstantData.dateFormatWithDash)
                                                                    ),
                                                       " ", queriesString
                                                      );
                     }
 
-                    //INSERT INTO Files(FileName, FileVersion, ChangeDate) VALUES('testNameFile', '', '2017-03-30T13:00:00.00+03:00')
+                    //for (int i = 0; i < ds.Tables[0].Rows.Count; i++) {
+                    //    file.FileVersion = Convert.ToString(ds.Tables[0].Rows[i].ItemArray[0]);
+
+                    //    file.Name = Convert.ToString(ds.Tables[0].Rows[i].ItemArray[0]);
+
+                    //    dateObject = ds.Tables[0].Rows[i].ItemArray[1];
+                    //    if (dateObject == null)
+                    //        file.DateTime = DateTime.Now;
+                    //    else
+                    //        file.DateTime = DateTime.ParseExact(
+                    //                                          Convert.ToString(dateObject),
+                    //                                          ConstantData.dateFormatWithDash, provider
+                    //                                         );
+
+                    //    queriesString = string.Concat(string.Format(ConstantData.insertQueryTemplate,
+                    //                                                "Files", file.Name, file.FileVersion,
+                    //                                                file.DateTime.ToString(ConstantData.dateFormatWithDash)
+                    //                                               ),
+                    //                                  " ", queriesString
+                    //                                 );
+                    //}
+
                     sqlCommand = new SqlCommand(queriesString, connection);
                     adapter.InsertCommand = sqlCommand;
                     adapter.InsertCommand.ExecuteNonQuery();
 
-
-                    //TODO удалить обработанный файл
-                    returnMessage = "Данные загружены в базу данных. " + queriesString;
+                    returnMessage = "Данные загружены в базу данных.";
                 }
+            } catch (FormatException e) {
+                returnMessage = "Проблема с форматом даты-времени.\r\n" + e.ToString();
             } catch (Exception e) {
                 returnMessage = e.ToString();
             } finally {
                 connection.Close();
-                //xmlFile.Close();
-                //System.IO.File.Delete(pathToInputXML);
+                xmlFile.Close();
+                System.IO.File.Delete(pathToInputXML);
             }
 
             //todo переделать на сообщение на странице.
