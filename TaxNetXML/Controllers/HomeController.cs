@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Data.Entity;
 using System.Net;
 using System.Threading.Tasks;
@@ -9,16 +10,14 @@ namespace TaxNetXML.Controllers {
     public class HomeController : Controller {
         private FileContext db = new FileContext();
         private static bool started = false;
+        public static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         //
         // Summary:
         //     Получает из БД список данных и отправляет его в представление пользователю.
         public async Task<ActionResult> Index() {
             if (!started) {
-                ConstantData._logger.Trace("Version: {0}", Environment.Version.ToString());
-                ConstantData._logger.Trace("OS: {0}", Environment.OSVersion.ToString());
-                ConstantData._logger.Trace("Command: {0}", Environment.CommandLine.ToString());
-                ConstantData._logger.Info("Application start");
+                _logger.Info("Application start");
                 started = true;
             }
 
@@ -48,12 +47,12 @@ namespace TaxNetXML.Controllers {
         // GET: BackupDB/Edit/5
         public async Task<ActionResult> Edit(int? id) {
             if (id == null) {
-                ConstantData._logger.Debug("Method Edit, id = null, HttpStatusCode.BadRequest");
+                _logger.Debug("Method Edit, id = null, HttpStatusCode.BadRequest");
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             File file = await db.Files.FindAsync(id);
             if (file == null) {
-                ConstantData._logger.Debug("Method Edit, file = null, HttpNotFound");
+                _logger.Debug("Method Edit, file = null, HttpNotFound");
                 return HttpNotFound();
             }
             return View(file);
@@ -76,12 +75,12 @@ namespace TaxNetXML.Controllers {
         // GET: BackupDB/Details/5
         public async Task<ActionResult> Details(int? id) {
             if (id == null) {
-                ConstantData._logger.Debug("Method Details, id = null, HttpStatusCode.BadRequest");
+                _logger.Debug("Method Details, id = null, HttpStatusCode.BadRequest");
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             File file = await db.Files.FindAsync(id);
             if (file == null) {
-                ConstantData._logger.Debug("Method Details, file = null, HttpNotFound");
+                _logger.Debug("Method Details, file = null, HttpNotFound");
                 return HttpNotFound();
             }
             return View(file);
@@ -90,12 +89,12 @@ namespace TaxNetXML.Controllers {
         // GET: BackupDB/Delete/5
         public async Task<ActionResult> Delete(int? id) {
             if (id == null) {
-                ConstantData._logger.Debug("Method Delete, id = null, HttpStatusCode.BadRequest");
+                _logger.Debug("Method Delete, id = null, HttpStatusCode.BadRequest");
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             File file = await db.Files.FindAsync(id);
             if (file == null) {
-                ConstantData._logger.Debug("Method Delete, file = null, HttpNotFound");
+                _logger.Debug("Method Delete, file = null, HttpNotFound");
                 return HttpNotFound();
             }
             return View(file);

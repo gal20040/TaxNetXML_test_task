@@ -36,9 +36,9 @@ namespace TaxNetXML.Controllers {
                     upload.SaveAs(pathToInputXML);
                     returnMessage = ReadFromXml(pathToInputXML);
                 } catch (IOException e) {
-                    ConstantData._logger.Debug("Method Upload, Проблема при открытии файла: не существует или занят другим приложением. " + e.ToString());
+                    HomeController._logger.Debug("Method Upload, Проблема при открытии файла: не существует или занят другим приложением. " + e.ToString());
                 } catch (Exception e) {
-                    ConstantData._logger.Debug("Method Upload. " + e.ToString());
+                    HomeController._logger.Debug("Method Upload. " + e.ToString());
                 }
 
                 return returnMessage;
@@ -110,9 +110,9 @@ namespace TaxNetXML.Controllers {
                     returnMessage = "Данные загружены в базу данных.";
                 }
             } catch (FormatException e) {
-                ConstantData._logger.Debug("Method ReadFromXml, Проблема с форматом даты-времени. " + e.ToString());
+                HomeController._logger.Debug("Method ReadFromXml, Проблема с форматом даты-времени. " + e.ToString());
             } catch (Exception e) {
-                ConstantData._logger.Debug("Method ReadFromXml. " + e.ToString());
+                HomeController._logger.Debug("Method ReadFromXml. " + e.ToString());
                 returnMessage = e.ToString();
             } finally {
                 connection.Close();
