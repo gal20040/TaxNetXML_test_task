@@ -212,10 +212,10 @@
     <Content Include="Views\Home\BackupDBToFile.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\LoadXMLtoDB\Index.cshtml" />
-    <Content Include="Views\BackupDB\Create.cshtml" />
-    <Content Include="Views\BackupDB\Delete.cshtml" />
-    <Content Include="Views\BackupDB\Details.cshtml" />
-    <Content Include="Views\BackupDB\Edit.cshtml" />
+    <Content Include="Views\Home\Create.cshtml" />
+    <Content Include="Views\Home\Delete.cshtml" />
+    <Content Include="Views\Home\Details.cshtml" />
+    <Content Include="Views\Home\Edit.cshtml" />
     <Content Include="Views\BackupDB\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
