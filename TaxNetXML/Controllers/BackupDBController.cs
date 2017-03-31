@@ -1,6 +1,8 @@
-﻿using System.Data;
-using System.Data.SqlClient;
+﻿using System.Collections.Generic;
+using System.Data.Entity;
+using System.Globalization;
 using System.Web.Mvc;
+using System.Xml;
 using TaxNetXML.Models;
 
 namespace TaxNetXML.Controllers {
@@ -29,19 +31,44 @@ namespace TaxNetXML.Controllers {
         // Parameters:
         //   pathToOutputXML:
         //     Полный путь до файла в системе + его имя и расширение.
-        private void WriteToXml(string pathToOutputXML) { //void
-            using (SqlConnection connection = new SqlConnection(ConstantData.CONNECTION_STRING)) {
-                connection.Open();
-                SqlDataAdapter adapter = new SqlDataAdapter(ConstantData.querySelectFromFiles, connection);
+        private async void WriteToXml(string pathToOutputXML) {
+            //XmlNode newElem;
+            XmlDocument doc = new XmlDocument();
+            //XmlElement root = doc.DocumentElement;
+            CultureInfo provider = CultureInfo.InvariantCulture;
 
-                DataSet dataSet = new DataSet("Files");
-                DataTable dataTable = new DataTable("File");
-                dataSet.Tables.Add(dataTable);
-                adapter.Fill(dataSet.Tables["File"]);
+            const string version = "1.0";
+            const string encoding = "UTF-8";
+            const string standalone = "yes";
+            XmlNode docNode = doc.CreateXmlDeclaration(version, encoding, standalone);
+            doc.AppendChild(docNode); //XML-декларация <?xml version='1.0' encoding="UTF-8" standalone="yes"?>
 
-                dataSet.WriteXml(pathToOutputXML);
-                connection.Close();
+            XmlNode filesNode = doc.CreateElement("Files");
+            doc.AppendChild(filesNode); //внешний тэг <Files></Files>
+
+            IEnumerable<File> files = await db.Files.ToListAsync();
+            foreach (File file in files) {
+                XmlNode fileNode = doc.CreateElement("File");
+
+                XmlAttribute fileVersionAttribute = doc.CreateAttribute("FileVersion");
+                fileVersionAttribute.Value = file.FileVersion;
+                fileNode.Attributes.Append(fileVersionAttribute);
+
+                filesNode.AppendChild(fileNode);
+
+                XmlNode nameNode = doc.CreateElement("Name");
+                nameNode.AppendChild(doc.CreateTextNode(file.Name));
+                fileNode.AppendChild(nameNode);
+
+                XmlNode dateTimeNode = doc.CreateElement("DateTime");
+                dateTimeNode.AppendChild(doc.CreateTextNode(file.DateTime.ToString(ConstantData.dateFormatWithDash,
+                                                                                   provider
+                                                                                  )
+                                                           )
+                                        );
+                fileNode.AppendChild(dateTimeNode);
             }
+            doc.Save(pathToOutputXML);
         }
 
         //

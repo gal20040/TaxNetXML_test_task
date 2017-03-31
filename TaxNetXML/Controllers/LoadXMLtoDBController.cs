@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Data.SqlClient;
 using System.Globalization;
 using System.IO;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using System.Xml;
@@ -27,14 +27,14 @@ namespace TaxNetXML.Controllers {
         //     Если файл не передан, то возвращает соответствующее сообщение.
         //     Иначе ретранслирует сообщение об успешной загрузке данных в БД.
         [HttpPost]
-        public string Upload(HttpPostedFileBase upload) {
+        public async Task<string> Upload(HttpPostedFileBase upload) {
             if (upload != null) {
                 string returnMessage = "";
                 string pathToInputXML = Server.MapPath("~/Files/Input/Input.xml");
 
                 try {
                     upload.SaveAs(pathToInputXML);
-                    returnMessage = ReadFromXml(pathToInputXML);
+                    returnMessage = await ReadFromXml(pathToInputXML);
                 } catch (IOException e) {
                     returnMessage = "Method Upload, Проблема при открытии файла: не существует или занят другим приложением. " + e.ToString();
                     HomeController._logger.Debug(returnMessage);
@@ -60,58 +60,40 @@ namespace TaxNetXML.Controllers {
         //
         // Returns:
         //     Возвращает сообщение об успешной загрузке данных в БД.
-        private string ReadFromXml(string pathToInputXML) {
-            string queriesString = ""; //общий SQL запрос для нескольких строк
+        private async Task<string> ReadFromXml(string pathToInputXML) {
             string returnMessage = "";
             Models.File file = new Models.File();
             XmlReader xmlFile = XmlReader.Create(pathToInputXML, new XmlReaderSettings());
-            SqlConnection connection = new SqlConnection(ConstantData.CONNECTION_STRING);
             object dateObject = null;
 
             try {
-                using (connection) {
-                    SqlDataAdapter adapter = new SqlDataAdapter(ConstantData.querySelectFromFiles, connection);
-                    SqlCommand sqlCommand;
+                CultureInfo provider = CultureInfo.InvariantCulture;
 
-                    connection.Open();
-                    CultureInfo provider = CultureInfo.InvariantCulture;
+                XmlDocument doc = new XmlDocument();
+                doc.Load(pathToInputXML);
 
-                    XmlDocument doc = new XmlDocument();
-                    doc.Load(pathToInputXML);
+                file.FileVersion = doc.SelectSingleNode("File/@FileVersion").InnerText;
 
-                    file.FileVersion = doc.SelectSingleNode("File/@FileVersion").InnerText;
+                foreach (XmlNode node in doc.SelectNodes("//File")) {
 
-                    foreach (XmlNode node in doc.SelectNodes("//File")) {
-                        dateObject = null;
-                        file.Name = node.SelectSingleNode("Name").InnerText;
+                    dateObject = null;
+                    file.Name = node.SelectSingleNode("Name").InnerText;
 
-                        //если в тэге DateTime пусто, то берём текущие дату и время.
-                        dateObject = node.SelectSingleNode("DateTime").InnerText;
-                        if (dateObject == null)
-                            file.DateTime = DateTime.Now;
-                        else
-                            file.DateTime = DateTime.ParseExact(
-                                                              Convert.ToString(dateObject),
-                                                              ConstantData.dateFormatWithDash, provider
-                                                             );
+                    //если в тэге DateTime пусто, то берём текущие дату и время.
+                    dateObject = node.SelectSingleNode("DateTime").InnerText;
+                    if (dateObject == null)
+                        file.DateTime = DateTime.Now;
+                    else
+                        file.DateTime = DateTime.ParseExact(
+                                                          Convert.ToString(dateObject),
+                                                          ConstantData.dateFormatWithDash, provider
+                                                         );
 
-                        //добавляем всю инфу по текущему node в шаблон запроса
-                        //и добавляем готовый запрос в общий список
-                        //todo сейчас для каждой строки свой запрос - сделать общий запрос.
-                        queriesString = string.Concat(string.Format(ConstantData.insertQueryTemplate,
-                                                                    "Files", file.Name, file.FileVersion,
-                                                                    file.DateTime.ToString(ConstantData.dateFormatWithDash)
-                                                                   ),
-                                                      " ", queriesString
-                                                     );
-                    }
-
-                    sqlCommand = new SqlCommand(queriesString, connection);
-                    adapter.InsertCommand = sqlCommand;
-                    adapter.InsertCommand.ExecuteNonQuery();
-
-                    returnMessage = "Данные загружены в базу данных.";
+                    HomeController.db.Files.Add(file);
                 }
+                await HomeController.db.SaveChangesAsync();
+
+                returnMessage = "Данные загружены в базу данных.";
             } catch (FormatException e) {
                 returnMessage = string.Concat("Method ReadFromXml, Проблема с форматом даты-времени. Дата, указанная в xml файле: ",
                                               Convert.ToString(dateObject), " ", e.ToString()
@@ -121,7 +103,6 @@ namespace TaxNetXML.Controllers {
                 returnMessage = "Method ReadFromXml. " + e.ToString();
                 HomeController._logger.Debug(returnMessage);
             } finally {
-                connection.Close();
                 xmlFile.Close();
                 System.IO.File.Delete(pathToInputXML);
             }

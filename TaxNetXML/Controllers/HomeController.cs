@@ -7,7 +7,7 @@ using TaxNetXML.Models;
 
 namespace TaxNetXML.Controllers {
     public class HomeController : Controller {
-        private FileContext db = new FileContext();
+        public static readonly FileContext db = new FileContext();
         public static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         //
@@ -105,11 +105,11 @@ namespace TaxNetXML.Controllers {
             return RedirectToAction("Index");
         }
 
-        protected override void Dispose(bool disposing) {
-            if (disposing) {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+        //protected override void Dispose(bool disposing) {
+        //    if (disposing) {
+        //        db.Dispose();
+        //    }
+        //    base.Dispose(disposing);
+        //}
     }
 }
