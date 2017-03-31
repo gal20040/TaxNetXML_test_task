@@ -240,3 +240,5 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/TaxNetXML/Files/Input/Input.xml
+/TaxNetXML/Files/Output/db_backup.xml

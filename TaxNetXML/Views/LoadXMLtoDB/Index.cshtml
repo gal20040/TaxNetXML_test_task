@@ -1,0 +1,54 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Загрузка данных из XML файла в БД";
+}
+<h2>@ViewBag.Title</h2>
+
+<div>
+    <p>
+        <h4>Имя файла должно иметь формат «XX_YY_ZZ.XML», где:</h4>
+        <ul>
+            <li>XX – набор русских букв. Количество символов - не более 100;</li>
+            <li>YY – набор цифр. Количество символов – либо 1, либо 10, либо от 14 до 20;</li>
+            <li>ZZ – любые символы. Количество символов – не более 7.</li>
+        </ul>
+    </p>
+    <p>
+        <h4>Дополнительно реализованные ограничения:</h4>
+        <ul>
+            <li>XX - только заглавные буквы;</li>
+            <li>ZZ - если буквы, то только заглавные;</li>
+            <li>XML - только заглавные буквы.</li>
+        </ul>
+    </p>
+    <p>
+        <h4>Ограничения, которые не удалось реализовать:</h4>
+        <ul>
+            <li>отсутствие лишних знаков до и после искомой строки (^ и $ не помогли).</li>
+        </ul>
+    </p>
+
+    <h4>Выберите файл для загрузки</h4>
+    @using (Html.BeginForm("Upload",
+                           "LoadXMLtoDB",
+                           FormMethod.Post,
+                           new { enctype = "multipart/form-data" }
+                          )) {
+        <input type="file" required="required" name="upload" onchange="checkFileName(this, this.form)" /><br>
+        <input type="submit" value="Загрузить" />
+    }
+</div>
+
+<script type="text/javascript">
+    function checkFileName(val, oForm) {
+        var regExpr = /[А-Я]{0,100}_(\d{1}|\d{10}|\d{14,20})_[^a-zа-я]{0,7}\.XML/g;
+        var messageWrongFormat = "Неправильный формат файла.\n Форма будет очищена.";
+        var v = val.value;
+        var v = v.search(regExpr);
+        if (v == -1) {
+            alert(messageWrongFormat);
+            var elements = oForm.elements;
+            oForm.reset();
+        }
+    }
+</script>
