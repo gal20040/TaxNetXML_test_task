@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data.Entity;
 using System.Globalization;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using System.Xml;
 using TaxNetXML.Models;
@@ -16,10 +17,10 @@ namespace TaxNetXML.Controllers {
         //
         // Returns:
         //     Ретранслирует выгруженный файл пользователю.
-        public FileResult BackupDBToXML() { //FileResult
+        public async Task<FileResult> BackupDBToXML() {
             string pathToOutputXML = "";
             pathToOutputXML = Server.MapPath("~/Files/Output/db_backup.xml");
-            WriteToXml(pathToOutputXML);
+            await WriteToXml(pathToOutputXML);
 
             return GiveFileToUser(pathToOutputXML);
         }
@@ -31,10 +32,8 @@ namespace TaxNetXML.Controllers {
         // Parameters:
         //   pathToOutputXML:
         //     Полный путь до файла в системе + его имя и расширение.
-        private async void WriteToXml(string pathToOutputXML) {
-            //XmlNode newElem;
+        private async Task<string> WriteToXml(string pathToOutputXML) {
             XmlDocument doc = new XmlDocument();
-            //XmlElement root = doc.DocumentElement;
             CultureInfo provider = CultureInfo.InvariantCulture;
 
             const string version = "1.0";
@@ -69,6 +68,7 @@ namespace TaxNetXML.Controllers {
                 fileNode.AppendChild(dateTimeNode);
             }
             doc.Save(pathToOutputXML);
+            return "";
         }
 
         //
