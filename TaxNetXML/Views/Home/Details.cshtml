@@ -1,0 +1,25 @@
+﻿@model TaxNetXML.Models.File
+@{ViewBag.Title = "Подробности";}
+
+<div>
+    <h4>File</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>@Html.DisplayNameFor(model => model.Id):</dt>
+        <dd>@Html.DisplayFor(model => model.Id)</dd>
+
+        <dt>@Html.DisplayNameFor(model => model.Name):</dt>
+        <dd>@Html.DisplayFor(model => model.Name)</dd>
+
+        <dt>@Html.DisplayNameFor(model => model.FileVersion):</dt>
+        <dd>@Html.DisplayFor(model => model.FileVersion)</dd>
+
+        <dt>@Html.DisplayNameFor(model => model.DateTime):</dt>
+        <dd>@Html.DisplayFor(model => model.DateTime)</dd>
+    </dl>
+</div>
+
+<p>
+    @Html.ActionLink("Редактировать", "Edit", new { id = Model.Id }) |
+    @Html.ActionLink("Назад на главную страницу", "Index")
+</p>
