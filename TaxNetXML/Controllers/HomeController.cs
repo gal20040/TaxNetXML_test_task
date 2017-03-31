@@ -1,5 +1,4 @@
 ﻿using NLog;
-using System;
 using System.Data.Entity;
 using System.Net;
 using System.Threading.Tasks;
@@ -9,17 +8,13 @@ using TaxNetXML.Models;
 namespace TaxNetXML.Controllers {
     public class HomeController : Controller {
         private FileContext db = new FileContext();
-        private static bool started = false;
         public static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         //
         // Summary:
         //     Получает из БД список данных и отправляет его в представление пользователю.
         public async Task<ActionResult> Index() {
-            if (!started) {
-                _logger.Info("Application start");
-                started = true;
-            }
+            _logger.Info("Method Index");
 
             return View(await db.Files.ToListAsync());
         }

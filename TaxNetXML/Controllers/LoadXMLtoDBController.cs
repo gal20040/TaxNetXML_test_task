@@ -36,9 +36,11 @@ namespace TaxNetXML.Controllers {
                     upload.SaveAs(pathToInputXML);
                     returnMessage = ReadFromXml(pathToInputXML);
                 } catch (IOException e) {
-                    HomeController._logger.Debug("Method Upload, Проблема при открытии файла: не существует или занят другим приложением. " + e.ToString());
+                    returnMessage = "Method Upload, Проблема при открытии файла: не существует или занят другим приложением. " + e.ToString();
+                    HomeController._logger.Debug(returnMessage);
                 } catch (Exception e) {
-                    HomeController._logger.Debug("Method Upload. " + e.ToString());
+                    returnMessage = "Method Upload. " + e.ToString();
+                    HomeController._logger.Debug(returnMessage);
                 }
 
                 return returnMessage;
@@ -64,6 +66,7 @@ namespace TaxNetXML.Controllers {
             Models.File file = new Models.File();
             XmlReader xmlFile = XmlReader.Create(pathToInputXML, new XmlReaderSettings());
             SqlConnection connection = new SqlConnection(ConstantData.CONNECTION_STRING);
+            object dateObject = null;
 
             try {
                 using (connection) {
@@ -72,7 +75,6 @@ namespace TaxNetXML.Controllers {
 
                     connection.Open();
                     CultureInfo provider = CultureInfo.InvariantCulture;
-                    object dateObject;
 
                     XmlDocument doc = new XmlDocument();
                     doc.Load(pathToInputXML);
@@ -80,6 +82,7 @@ namespace TaxNetXML.Controllers {
                     file.FileVersion = doc.SelectSingleNode("File/@FileVersion").InnerText;
 
                     foreach (XmlNode node in doc.SelectNodes("//File")) {
+                        dateObject = null;
                         file.Name = node.SelectSingleNode("Name").InnerText;
 
                         //если в тэге DateTime пусто, то берём текущие дату и время.
@@ -110,10 +113,13 @@ namespace TaxNetXML.Controllers {
                     returnMessage = "Данные загружены в базу данных.";
                 }
             } catch (FormatException e) {
-                HomeController._logger.Debug("Method ReadFromXml, Проблема с форматом даты-времени. " + e.ToString());
+                returnMessage = string.Concat("Method ReadFromXml, Проблема с форматом даты-времени. Дата, указанная в xml файле: ",
+                                              Convert.ToString(dateObject), " ", e.ToString()
+                                             );
+                HomeController._logger.Debug(returnMessage);
             } catch (Exception e) {
-                HomeController._logger.Debug("Method ReadFromXml. " + e.ToString());
-                returnMessage = e.ToString();
+                returnMessage = "Method ReadFromXml. " + e.ToString();
+                HomeController._logger.Debug(returnMessage);
             } finally {
                 connection.Close();
                 xmlFile.Close();

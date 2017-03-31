@@ -227,6 +227,7 @@
     <Content Include="Views\Home\Edit.cshtml" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="App_Data\nlog\" />
     <Folder Include="Files\Input\" />
     <Folder Include="Files\Output\" />
   </ItemGroup>
