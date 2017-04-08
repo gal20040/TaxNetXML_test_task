@@ -25,3 +25,15 @@
 #### Визуальный интерфейс для взаимодействия с пользователем разрабатывается программистом самостоятельно с использованием ASP.NET MVC.
 
 #### Кроме исходных текстов программы нужно приложить скрипт создания БД.
+
+
+скрипт создания БД:
+CREATE TABLE [dbo].[Files] (
+    [Id]          INT            IDENTITY (1, 1) NOT NULL,
+    [Name]        NVARCHAR (100) NOT NULL,
+    [FileVersion] NVARCHAR (50)  NOT NULL,
+    [DateTime]    DATETIME2 (7)  NOT NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+Приложение на хостинге: http://www.xmltodb.somee.com/ (тариф бесплатный, не знаю, когда отключат)
